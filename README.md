@@ -69,6 +69,7 @@ scss/
 │   ├── _tokens.scss
 │   └── _mixins.scss
 ├── layout/              # 配置専用（margin / position などコンテキスト依存）
+│   ├── _spacing.scss    # .mt-4 などのユーティリティクラス
 │   ├── _stack.scss
 │   └── _grid.scss
 ├── blocks/              # UI Block（コンポーネント）
@@ -90,6 +91,38 @@ scss/
 > - **Element単位の分割をしない:** `_card__title.scss` のようにElementごとにファイルを切らない。
 > - **ページ単位の巨大ファイルに寄せない:** `_home.scss` に複数Blockを同居させない。
 > - **子Blockの上書き用ファイルを作らない:** 親から子コンポーネントを直接スタイリングする置き場は設けない（第6節のアンチパターン2と同趣旨）。
+
+### **ユーティリティクラスの配置**
+
+`.mt-4` や `.mt-8` のようなユーティリティクラスは BEM の Block ではないため、`blocks/` には置きません。外側の余白はレイアウトの責務なので、`layout/_spacing.scss` に配置します。
+
+```scss
+// layout/_spacing.scss
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mt-8 {
+  margin-top: 2rem;
+}
+```
+
+| 書き方 | 置き場所 | 例 |
+| :----- | :------- | :--- |
+| コンポーネント内のレイアウト | Block 内の Element | `.card__action-area` |
+| ページ組み立て用の汎用クラス | `layout/`（または `utilities/`） | `.mt-4`, `.stack` |
+| UI コンポーネント本体 | `blocks/` | `.card`, `.button` |
+
+`margin` 以外のユーティリティ（`p-4`, `flex`, `text-center` など）も増える場合は、`layout/` ではなく `utilities/` を切り分けても構いません。
+
+```text
+scss/
+├── utilities/
+│   ├── _spacing.scss
+│   └── _display.scss
+```
+
+まずは Block 内の Element でレイアウトを表現し、汎用化が必要な場合にのみ `layout/`（または `utilities/`）へ置くことを推奨します。
 
 ## **6\. アンチパターン（やってはいけない書き方）**
 
