@@ -72,10 +72,13 @@ scss/
 │   ├── _spacing.scss    # .mt-4 などのユーティリティクラス
 │   ├── _stack.scss
 │   └── _grid.scss
-├── blocks/              # UI Block（コンポーネント）
+├── blocks/              # 再利用する UI Block（コンポーネント）
 │   ├── _button.scss
 │   ├── _card.scss
 │   └── _user-profile.scss
+├── pages/               # 特定ページ専用の Block
+│   ├── _home.scss
+│   └── _about.scss
 └── main.scss            # @use で集約する入口
 ```
 
@@ -83,13 +86,14 @@ scss/
 | :----------- | :--- |
 | **foundation/** | リセット、デザイントークン、ミックスインなど、BEMの階層に属さない共通基盤 |
 | **layout/** | 外側の余白や配置など、コンテキスト依存のスタイル専用（第4節の責務分離に対応） |
-| **blocks/** | UIコンポーネント（Block）。1ファイル = 1 Block |
+| **blocks/** | 再利用するUIコンポーネント（Block）。1ファイル = 1 Block |
+| **pages/** | 特定ページ専用の組み立て用 Block。1ファイル = 1ページBlock |
 | **main.scss** | 上記を `@use` で読み込むエントリポイント |
 
-小さく始める場合は `foundation/` + `blocks/` + `main.scss` だけでも構いません。規模に応じて `layout/` を追加します。
+小さく始める場合は `foundation/` + `blocks/` + `main.scss` だけでも構いません。規模に応じて `layout/` や `pages/` を追加します。
 
 > - **Element単位の分割をしない:** `_card__title.scss` のようにElementごとにファイルを切らない。
-> - **ページ単位の巨大ファイルに寄せない:** `_home.scss` に複数Blockを同居させない。
+> - **ページファイルに複数Blockを同居させない:** `_home.scss` に `.card` や `.button` の定義を書かない。再利用UIは `blocks/`、ページ固有の構成だけを `pages/` に置く。
 > - **子Blockの上書き用ファイルを作らない:** 親から子コンポーネントを直接スタイリングする置き場は設けない（第6節のアンチパターン2と同趣旨）。
 
 ### **ユーティリティクラスの配置**
@@ -123,6 +127,48 @@ scss/
 ```
 
 まずは Block 内の Element でレイアウトを表現し、汎用化が必要な場合にのみ `layout/`（または `utilities/`）へ置くことを推奨します。
+
+### **ページ専用ルールセットの配置**
+
+特定のページのみで使うルールセットは、ページを1つの Block とみなし `pages/` に配置します。再利用できる UI は `blocks/` に置き、ページ固有の構成・余白・並べ方だけを `pages/` に書きます。
+
+```html
+<main class="home">
+  <div class="home__hero">...</div>
+  <div class="home__section">
+    <div class="card">...</div>
+  </div>
+</main>
+```
+
+```scss
+// pages/_home.scss
+.home {}
+.home__hero {}
+.home__section {
+  margin-top: 2rem;
+}
+```
+
+| 内容 | 置き場所 | 例 |
+| :--- | :------- | :--- |
+| 他ページでも使う UI | `blocks/` | `.card`, `.button` |
+| そのページだけの構成・余白・配置 | `pages/` | `.home`, `.home__section` |
+| 汎用スペーシング | `layout/`（または `utilities/`） | `.mt-8`, `.stack` |
+
+ページから子の Block を直接上書きしてはいけません。余白や配置はページ側の Element に持たせます。
+
+```scss
+/* 悪い例 */
+.home .card {
+  margin-top: 2rem;
+}
+
+/* 良い例 */
+.home__section {
+  margin-top: 2rem;
+}
+```
 
 ## **6\. アンチパターン（やってはいけない書き方）**
 
